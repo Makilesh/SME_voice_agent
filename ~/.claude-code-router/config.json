@@ -1,0 +1,28 @@
+{
+  "log": true,
+  "log_level": "debug",
+  "providers": [
+    {
+      "name": "openrouter",
+      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key": "${OPENROUTER_API_KEY}",
+      "models": [
+        "x-ai/grok-4-fast"
+      ],
+      "transformer": {
+        "use": ["openrouter"],
+        "openrouter": {
+          "model_map": {
+            "claude-sonnet-4-5-20250929": "x-ai/grok-4-fast",
+            "claude-3-5-sonnet-20241022": "x-ai/grok-4-fast",
+            "default": "x-ai/grok-4-fast"
+          }
+        }
+      }
+    }
+  ],
+  "router": {
+    "default": "openrouter,x-ai/grok-4-fast"
+  },
+  "API_TIMEOUT_MS": 600000
+}
