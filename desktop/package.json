@@ -1,0 +1,22 @@
+{
+  "name": "meeting-copilot-overlay",
+  "version": "0.1.0",
+  "description": "Invisible meeting copilot overlay (Parakeet-style) — Electron shell",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.meetingcopilot.overlay",
+    "productName": "MeetingCopilot",
+    "files": ["**/*"],
+    "win": { "target": "nsis" }
+  }
+}
