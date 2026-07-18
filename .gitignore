@@ -1,0 +1,20 @@
+# Secrets — NEVER commit
+.env
+*service_acc*.json
+*.pem
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+chroma_db/
+temp_query.wav
+
+# Node / Electron
+desktop/node_modules/
+desktop/dist/
+
+# OS
+Thumbs.db
+.DS_Store
