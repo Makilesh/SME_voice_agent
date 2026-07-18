@@ -1,0 +1,115 @@
+:root {
+  --bg: rgba(18, 20, 28, 0.82);
+  --bg-solid: #12141c;
+  --fg: #e8eaf0;
+  --muted: #8b93a7;
+  --accent: #6ea8fe;
+  --them: #ffd479;
+  --you: #7ee0a1;
+  --card: rgba(40, 44, 60, 0.9);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body {
+  font: 13px/1.45 "Segoe UI", system-ui, sans-serif;
+  color: var(--fg);
+  background: transparent;         /* window is transparent; #app paints the panel */
+  user-select: none;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Drag handle = the top bar */
+#bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  -webkit-app-region: drag;
+  background: rgba(0, 0, 0, 0.25);
+}
+#bar button, #bar .mini { -webkit-app-region: no-drag; }
+#title { font-weight: 600; }
+#status { color: var(--muted); font-size: 11px; }
+.spacer { flex: 1; }
+
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #555; }
+.dot.on { background: #37d67a; box-shadow: 0 0 8px #37d67a; }
+.dot.off { background: #555; }
+
+.mini {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.mini:hover { background: rgba(255, 255, 255, 0.16); }
+.mini.on { background: var(--accent); color: #04122e; border-color: var(--accent); }
+
+.pane { padding: 8px 10px; overflow-y: auto; }
+.pane-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+
+#copilotPane { flex: 0 0 auto; max-height: 42%; }
+#transcriptPane { flex: 1 1 auto; min-height: 60px; }
+#notesPane { flex: 0 0 auto; max-height: 30%; }
+#notesPane.collapsed #notes { display: none; }
+#notesToggle { cursor: pointer; -webkit-app-region: no-drag; }
+
+/* Copilot cards */
+.card {
+  background: var(--card);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  user-select: text;
+}
+.card .q { color: var(--them); font-size: 11px; margin-bottom: 4px; }
+.card .a { white-space: pre-wrap; }
+.card.draft .a { color: var(--muted); font-style: italic; }
+.card.final .a { color: var(--fg); font-style: normal; }
+.card.qa { border-left-color: var(--you); }
+
+/* Transcript lines */
+.line { margin-bottom: 3px; user-select: text; }
+.line .who { font-size: 10px; font-weight: 700; margin-right: 5px; }
+.line.them .who { color: var(--them); }
+.line.you .who { color: var(--you); }
+.line.partial { opacity: 0.55; }
+
+#notes .n-summary { margin-bottom: 6px; }
+#notes ul { margin: 0 0 6px 16px; padding: 0; }
+#notes li { user-select: text; }
+
+#askbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-app-region: no-drag;
+}
+#ask {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 5px 8px;
+  outline: none;
+}
+#hint { font-size: 9px; color: var(--muted); text-align: center; padding: 0 0 6px; }

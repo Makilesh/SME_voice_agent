@@ -1,0 +1,8 @@
+Structured vs. Unstructured Data
+Unstructured Data: This is the most common type for a RAG-based chatbot. It includes free-form text documents that are not organized in a specific format. Your financial knowledge base (KB) is a perfect example.
+
+Examples: PDF documents like annual reports, loan application forms, investment guides, and text-based articles or FAQs about mutual funds and SIPs.
+
+Structured Data: This is highly organized data that is easy to search and analyze, typically stored in tables. While your RAG pipeline is primarily for unstructured data, your chatbot can also query external sources for this type of information.
+
+Examples: Financial statements (balance sheets, income statements), market data (stock prices, trading volumes), and customer data (account balances, transaction history).

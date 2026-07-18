@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; connect-src ws://127.0.0.1:8000; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Meeting Copilot</title>
+</head>
+<body>
+  <div id="app">
+    <header id="bar">
+      <span id="dot" class="dot off"></span>
+      <span id="title">Copilot</span>
+      <span id="status">idle</span>
+      <div class="spacer"></div>
+      <button id="startBtn" class="mini">Start</button>
+      <button id="autoBtn" class="mini on" title="Auto-suggest answers">Auto</button>
+    </header>
+
+    <section id="copilotPane" class="pane">
+      <div class="pane-title">Suggested answer</div>
+      <div id="cards"></div>
+    </section>
+
+    <section id="transcriptPane" class="pane">
+      <div class="pane-title">Transcript</div>
+      <div id="transcript"></div>
+    </section>
+
+    <section id="notesPane" class="pane collapsed">
+      <div class="pane-title" id="notesToggle">Notes ▸</div>
+      <div id="notes"></div>
+    </section>
+
+    <footer id="askbar">
+      <input id="ask" type="text" placeholder="Ask anything (Ctrl+Shift+K)…" />
+      <button id="askBtn" class="mini">Ask</button>
+    </footer>
+    <div id="hint">Ctrl+Shift+Space hide · Ctrl+Shift+X click-through · Ctrl+Shift+A suggest</div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

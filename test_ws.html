@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head><title>WS Audio Test with Mic (PCM)</title></head>
+<body>
+    <h1>WebSocket Audio Test with Microphone (Fixed for STT)</h1>
+    <p>1. Click "Connect WS".<br>
+       2. Click "Start Recording" (allow mic; speak clearly).<br>
+       3. Click "Stop & Send" to process (converts to raw PCM for Google STT).<br>
+       4. Watch console (F12) for transcript/response; TTS plays automatically.</p>
+    <button id="connect">Connect WS</button>
+    <button id="startRecord" disabled>Start Recording</button>
+    <button id="stopRecord" disabled style="display:none;">Stop & Send</button>
+    <div id="status">Disconnected</div>
+    <div id="response"></div>
+    <audio id="ttsAudio" controls style="display:none;"></audio>
+    <script>
+        let ws;
+        let audioContext;
+        let mediaStreamSource;
+        let processor;
+        let audioChunks = []; // For raw PCM samples
+        const sampleRate = 16000; // STT expects 16kHz
+        const connectBtn = document.getElementById("connect");
+        const startBtn = document.getElementById("startRecord");
+        const stopBtn = document.getElementById("stopRecord");
+        const statusDiv = document.getElementById("status");
+        const responseDiv = document.getElementById("response");
+        const ttsAudio = document.getElementById("ttsAudio");
+
+        // Connect to WebSocket
+        connectBtn.onclick = () => {
+            ws = new WebSocket("ws://localhost:8000/ws/audio");
+            ws.onopen = () => { 
+                statusDiv.innerHTML = "Connected! Ready for audio."; 
+                startBtn.disabled = false; 
+                connectBtn.disabled = true;
+                console.log("WS Connected - Ready to record");
+            };
+            ws.onmessage = (event) => { 
+                console.log("Received from server:", event.data); // Raw bytes, but log for debug
+                const audioBlob = new Blob([event.data], { type: "audio/mp3" }); // MP3 from TTS
+                const audioUrl = URL.createObjectURL(audioBlob);
+                ttsAudio.src = audioUrl;
+                ttsAudio.style.display = "block";
+                ttsAudio.play().catch(e => console.error("Play error:", e));
+                responseDiv.innerHTML += `<p>Received TTS audio (${event.data.byteLength} bytes). Playing!</p>`;
+                URL.revokeObjectURL(audioUrl);
+            };
+            ws.onclose = () => { 
+                statusDiv.innerHTML = "Disconnected"; 
+                startBtn.disabled = true; 
+                stopBtn.style.display = "none";
+                connectBtn.disabled = false;
+                console.log("WS Closed");
+            };
+            ws.onerror = (e) => { 
+                statusDiv.innerHTML = "Error: " + (e || "Connection failed"); 
+                console.error("WS Error:", e);
+            };
+        };
+
+        // Start mic recording with PCM conversion
+        startBtn.onclick = async () => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert("Connect WS first!");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: { 
+                    sampleRate: sampleRate, 
+                    channelCount: 1, 
+                    echoCancellation: true 
+                } });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: sampleRate });
+                mediaStreamSource = audioContext.createMediaStreamSource(stream);
+                processor = audioContext.createScriptProcessor(4096, 1, 1); // Buffer size
+
+                audioChunks = [];
+                processor.onaudioprocess = (e) => {
+                    const inputData = e.inputBuffer.getChannelData(0); // Mono channel
+                    const pcmBuffer = new Float32Array(inputData); // Already PCM
+                    audioChunks.push(pcmBuffer); // Collect samples
+                };
+
+                mediaStreamSource.connect(processor);
+                processor.connect(audioContext.destination); // Optional: hear yourself
+
+                statusDiv.innerHTML = "Recording... Speak now! Click Stop & Send when done.";
+                startBtn.disabled = true;
+                stopBtn.style.display = "inline";
+                stopBtn.disabled = false;
+                console.log("Recording started - PCM at 16kHz");
+
+            } catch (err) {
+                statusDiv.innerHTML = "Mic Error: " + err.message;
+                console.error("Mic Error:", err);
+                responseDiv.innerHTML += "<p>Tip: Allow mic; use Chrome/Edge.</p>";
+            }
+        };
+
+        // Stop and send PCM bytes
+        stopBtn.onclick = () => {
+            if (processor) {
+                processor.disconnect();
+            }
+            if (mediaStreamSource) {
+                mediaStreamSource.disconnect();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+
+            // Convert collected chunks to single Int16Array (STT expects LINEAR16)
+            let totalLength = 0;
+            audioChunks.forEach(chunk => totalLength += chunk.length);
+            const fullPcm = new Float32Array(totalLength);
+            let offset = 0;
+            audioChunks.forEach(chunk => {
+                fullPcm.set(chunk, offset);
+                offset += chunk.length;
+            });
+
+            // Convert Float32 (-1 to 1) to Int16 (-32768 to 32767)
+            const int16Bytes = new Int16Array(fullPcm.length);
+            for (let i = 0; i < fullPcm.length; i++) {
+                int16Bytes[i] = Math.max(-32768, Math.min(32767, fullPcm[i] * 32768));
+            }
+            const byteArray = new Uint8Array(int16Bytes.buffer);
+
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(byteArray.buffer); // Send raw PCM bytes
+                statusDiv.innerHTML = `Sent ${byteArray.length} PCM bytes. Processing...`;
+                responseDiv.innerHTML += `<p>Audio sent (${byteArray.length / 2} samples @ 16kHz). Check console/server for transcript.</p>`;
+                console.log("Sent PCM bytes:", byteArray.length);
+            }
+
+            // Reset
+            audioChunks = [];
+            startBtn.disabled = false;
+            stopBtn.style.display = "none";
+        };
+    </script>
+</body>
+</html>
