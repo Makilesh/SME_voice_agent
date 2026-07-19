@@ -11,6 +11,7 @@ import redis
 # from twilio.rest import Client  # Optional
 from fastapi.staticfiles import StaticFiles
 
+
 load_dotenv()
 
 app = FastAPI()
