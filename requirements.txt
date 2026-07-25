@@ -1,38 +1,44 @@
 # ── Meeting Copilot backend (pivoted from SME voice agent) ───────────────
 # Python 3.11 / 3.12 on Windows.
 #
-# torch is intentionally NOT pinned here — install the build that matches your
-# hardware BEFORE the rest (see README "GPU / CPU" section):
-#   GPU (CUDA 12):  pip install torch --index-url https://download.pytorch.org/whl/cu121
-#   CPU only:       pip install torch --index-url https://download.pytorch.org/whl/cpu
+# IMPORTANT — install torch BEFORE this file, matched to your hardware, because
+# RealtimeSTT pulls in torch + torchaudio and torchaudio MUST match the torch
+# version exactly:
+#   GPU (CUDA 12):  pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   CPU only:       pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+# Then:  pip install -r requirements.txt
+#
+# Version policy: RealtimeSTT hard-pins several shared libs (scipy, soundfile,
+# websockets, faster-whisper, PyAudio, torch, torchaudio). We intentionally do
+# NOT pin those here — RealtimeSTT owns them, so pip stays conflict-free.
 
-# API / server
+# ── API / server ──
 fastapi==0.115.6
-uvicorn[standard]==0.34.0
-websockets==14.1
-pydantic==2.10.4
-pydantic-settings==2.7.1
+uvicorn[standard]==0.34.0          # provides websockets (RealtimeSTT pins 15.0.1)
 python-dotenv==1.0.1
-python-multipart==0.0.20
+python-multipart==0.0.20           # FastAPI UploadFile (/ingest)
+pydantic>=2.7                      # used by config.py (plain BaseModel)
 
-# Gemini
-google-genai==0.8.0
+# ── Gemini ──
+# Needs the 2.x SDK: code uses client.models.generate_content_stream + ThinkingConfig.
+google-genai>=2.7.0
 
-# Real-time STT (local, low-latency) — reused/upgraded from voice_engine_MVP
+# ── Real-time STT (local, low-latency) — reused/upgraded from voice_engine_MVP ──
+# Transitively pins: faster-whisper==1.1.1, scipy==1.15.2, soundfile==0.13.1,
+# websockets==15.0.1, PyAudio==0.2.14, torch, torchaudio.
 RealtimeSTT==0.3.104
-faster-whisper==1.1.0
 
-# Windows system-audio (WASAPI loopback) capture
+# ── Windows system-audio (WASAPI loopback) capture ──
+# Separate package from RealtimeSTT's PyAudio; imports as `pyaudiowpatch`.
 PyAudioWPatch==0.2.12.7
 
-# Audio utils
-numpy==2.2.1
-scipy==1.15.1
-soundfile==0.13.0
+# ── Audio utils (numpy left in a range compatible with scipy 1.15.2 / torch) ──
+numpy>=1.26,<2.3
 
-# RAG (local embeddings, no external key)
+# ── RAG ──
+# Chroma's built-in embedding function uses onnxruntime (a chromadb dep) — no
+# sentence-transformers/transformers stack required.
 chromadb==0.6.3
-sentence-transformers==3.3.1
 pypdf==5.1.0
 python-docx==1.1.2
 
@@ -40,5 +46,5 @@ python-docx==1.1.2
 # RealtimeTTS==0.4.55
 # cartesia==1.4.0
 
-# ── Legacy finance-bot deps (kept only if you still run the old streamlit_app) ──
-# streamlit>=1.28.1 ; google-cloud-speech ; google-cloud-texttospeech ; redis
+# ── Legacy finance-bot deps (only if you still run the old streamlit_app.py) ──
+# streamlit ; google-cloud-speech ; google-cloud-texttospeech ; redis ; sentence-transformers
