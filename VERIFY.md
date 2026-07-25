@@ -209,6 +209,7 @@ delta on the control socket. That interval is your **time-to-first-word**; targe
 | Transcription lags far behind speech | CPU STT with `small.en` | `STT_MODE=fast`, or install CUDA torch |
 | Suggestions never fire | Question heuristic didn't match, or you spoke recently | Use `Ctrl+Shift+A` to force |
 | Backend won't start: `ModuleNotFoundError` | Missing dep | `pip install -r requirements.txt` |
+| `error: Microsoft Visual C++ 14.0 or greater is required` building `chroma-hnswlib` | Old `chromadb==0.6.3` pinned a C++ package with no cp312 wheel | Already fixed — `requirements.txt` now uses `chromadb==1.5.9` (prebuilt wheel, no compiler). Just re-run `pip install -r requirements.txt`. |
 
 ---
 
