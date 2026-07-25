@@ -36,9 +36,12 @@ PyAudioWPatch==0.2.12.7
 numpy>=1.26,<2.3
 
 # ── RAG ──
-# Chroma's built-in embedding function uses onnxruntime (a chromadb dep) — no
-# sentence-transformers/transformers stack required.
-chromadb==0.6.3
+# chromadb 1.x ships a prebuilt cp39-abi3 Windows wheel (native code bundled) and
+# dropped the chroma-hnswlib C++ dependency — so NO MSVC build tools are needed.
+# (0.6.x pinned chroma-hnswlib==0.7.6, which has no cp312 wheel and fails to compile.)
+# Chroma's built-in embedding function uses onnxruntime (a chromadb dep, also a
+# prebuilt wheel) — no sentence-transformers/transformers stack required.
+chromadb==1.5.9
 pypdf==5.1.0
 python-docx==1.1.2
 
